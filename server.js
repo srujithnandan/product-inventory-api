@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
 
 // Middleware to enable CORS
