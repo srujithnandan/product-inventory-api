@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Inventory Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .products-list {
+            grid-column: 1 / -1;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .product-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .product-card .price {
+            color: #667eea;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .product-card .stock {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .stock.in-stock {
+            background: #4ade80;
+            color: white;
+        }
+
+        .stock.out-of-stock {
+            background: #f87171;
+            color: white;
+        }
+
+        .product-card .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .product-card .actions button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+        }
+
+        .filters {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filters button {
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #6ee7b7 0%, #10b981 100%);
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 Product Inventory</h1>
+            <p>Manage your products efficiently</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="stat-card">
+                <h3 id="totalProducts">0</h3>
+                <p>Total Products</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="inStockCount">0</h3>
+                <p>In Stock</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="outOfStockCount">0</h3>
+                <p>Out of Stock</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalValue">₹0</h3>
+                <p>Total Inventory Value</p>
+            </div>
+        </div>
+
+        <div id="messageContainer"></div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2 id="formTitle">➕ Add New Product</h2>
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+                    <div class="form-group">
+                        <label for="productName">Product Name</label>
+                        <input type="text" id="productName" placeholder="e.g., Laptop" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Price (₹)</label>
+                        <input type="number" id="productPrice" placeholder="e.g., 60000" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="productStock" checked>
+                            <label for="productStock">In Stock</label>
+                        </div>
+                    </div>
+                    <button type="submit" id="submitBtn">Add Product</button>
+                    <button type="button" id="cancelBtn" style="display: none; background: #6b7280; margin-top: 10px;">Cancel</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>🔍 Quick Actions</h2>
+                <div class="filters">
+                    <button class="btn-filter" onclick="loadProducts()">🔄 Refresh All</button>
+                    <button class="btn-filter" onclick="loadInStockProducts()">✅ Show In Stock</button>
+                    <button class="btn-filter" onclick="showAllProducts()">📋 Show All</button>
+                </div>
+                <div style="margin-top: 20px;">
+                    <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">
+                        <strong>💡 Tips:</strong><br>
+                        • Click on a product card to edit<br>
+                        • Use filters to view specific products<br>
+                        • All changes are saved automatically
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card products-list">
+            <h2>📊 Products List</h2>
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading products...</p>
+            </div>
+            <div id="productsContainer" class="products-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let isEditMode = false;
+
+        // Show message
+        function showMessage(message, type = 'success') {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            container.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        // Update statistics
+        function updateStats(products) {
+            const total = products.length;
+            const inStock = products.filter(p => p.inStock).length;
+            const outOfStock = total - inStock;
+            const totalValue = products.reduce((sum, p) => sum + (p.inStock ? p.price : 0), 0);
+
+            document.getElementById('totalProducts').textContent = total;
+            document.getElementById('inStockCount').textContent = inStock;
+            document.getElementById('outOfStockCount').textContent = outOfStock;
+            document.getElementById('totalValue').textContent = `₹${totalValue.toLocaleString('en-IN')}`;
+        }
+
+        // Load all products
+        async function loadProducts() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const container = document.getElementById('productsContainer');
+            
+            loadingIndicator.style.display = 'block';
+            container.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                const result = await response.json();
+                
+                loadingIndicator.style.display = 'none';
+
+                if (result.success && result.data.length > 0) {
+                    displayProducts(result.data);
+                    updateStats(result.data);
+                } else {
+                    showEmptyState();
+                }
+            } catch (error) {
+                loadingIndicator.style.display = 'none';
+                showMessage('Failed to load products. Make sure the server is running!', 'error');
+                showEmptyState();
+            }
+        }
+
+        // Load in-stock products only
+        async function loadInStockProducts() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const container = document.getElementById('productsContainer');
+            
+            loadingIndicator.style.display = 'block';
+            container.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/products/instock`);
+                const result = await response.json();
+                
+                loadingIndicator.style.display = 'none';
+
+                if (result.success && result.data.length > 0) {
+                    displayProducts(result.data);
+                } else {
+                    container.innerHTML = '<div class="empty-state"><p>No in-stock products found</p></div>';
+                }
+            } catch (error) {
+                loadingIndicator.style.display = 'none';
+                showMessage('Failed to load in-stock products', 'error');
+            }
+        }
+
+        // Show all products
+        function showAllProducts() {
+            loadProducts();
+        }
+
+        // Display products
+        function displayProducts(products) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <div class="price">₹${product.price.toLocaleString('en-IN')}</div>
+                    <span class="stock ${product.inStock ? 'in-stock' : 'out-of-stock'}">
+                        ${product.inStock ? '✅ In Stock' : '❌ Out of Stock'}
+                    </span>
+                    <div class="actions">
+                        <button class="btn-edit" onclick="editProduct(${product.id})">✏️ Edit</button>
+                        <button class="btn-delete" onclick="deleteProduct(${product.id})">🗑️ Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Show empty state
+        function showEmptyState() {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <h3>No products found</h3>
+                    <p>Add your first product using the form above</p>
+                </div>
+            `;
+        }
+
+        // Add/Update product
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('productId').value;
+            const name = document.getElementById('productName').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const inStock = document.getElementById('productStock').checked;
+
+            const productData = { name, price, inStock };
+
+            try {
+                let response;
+                if (isEditMode && id) {
+                    // Update existing product
+                    response = await fetch(`${API_URL}/products/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(productData)
+                    });
+                } else {
+                    // Add new product
+                    response = await fetch(`${API_URL}/products`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(productData)
+                    });
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(result.message);
+                    resetForm();
+                    loadProducts();
+                } else {
+                    showMessage(result.message || 'Operation failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to save product. Check if server is running!', 'error');
+            }
+        });
+
+        // Edit product
+        async function editProduct(id) {
+            try {
+                const response = await fetch(`${API_URL}/products/${id}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const product = result.data;
+                    document.getElementById('productId').value = product.id;
+                    document.getElementById('productName').value = product.name;
+                    document.getElementById('productPrice').value = product.price;
+                    document.getElementById('productStock').checked = product.inStock;
+
+                    document.getElementById('formTitle').textContent = '✏️ Edit Product';
+                    document.getElementById('submitBtn').textContent = 'Update Product';
+                    document.getElementById('cancelBtn').style.display = 'block';
+                    isEditMode = true;
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } catch (error) {
+                showMessage('Failed to load product details', 'error');
+            }
+        }
+
+        // Delete product
+        async function deleteProduct(id) {
+            if (!confirm('Are you sure you want to delete this product?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/products/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(result.message);
+                    loadProducts();
+                } else {
+                    showMessage('Failed to delete product', 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to delete product', 'error');
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('formTitle').textContent = '➕ Add New Product';
+            document.getElementById('submitBtn').textContent = 'Add Product';
+            document.getElementById('cancelBtn').style.display = 'none';
+            isEditMode = false;
+        }
+
+        // Cancel edit
+        document.getElementById('cancelBtn').addEventListener('click', resetForm);
+
+        // Load products on page load
+        loadProducts();
+    </script>
+</body>
+</html>
